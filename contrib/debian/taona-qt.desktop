@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Taona Core
+Comment=Connect to the Taona P2P Network
+Comment[de]=Verbinde mit dem Taona peer-to-peer Netzwerk
+Comment[fr]=Taona, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=Taona, eşten eşe kriptografik sanal para birimi
+Exec=taona-qt %u
+Terminal=false
+Type=Application
+Icon=taona128
+MimeType=x-scheme-handler/taona;
+Categories=Office;Finance;

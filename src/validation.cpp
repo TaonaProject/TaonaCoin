@@ -1,6 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2019 The Taona Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -9,6 +10,7 @@
 #include "arith_uint256.h"
 #include "chain.h"
 #include "chainparams.h"
+#include "base58.h"
 #include "checkpoints.h"
 #include "checkqueue.h"
 #include "consensus/consensus.h"
@@ -57,7 +59,7 @@
 #include "assets/assetdb.h"
 
 #if defined(NDEBUG)
-# error "Raven cannot be compiled without assertions."
+# error "Taona cannot be compiled without assertions."
 #endif
 
 #define MICRO 0.000001
@@ -108,7 +110,7 @@ static void CheckBlockIndex(const Consensus::Params& consensusParams);
 /** Constant stuff for coinbase transactions we create: */
 CScript COINBASE_FLAGS;
 
-const std::string strMessageMagic = "Raven Signed Message:\n";
+const std::string strMessageMagic = "Taona Signed Message:\n";
 
 // Internal stuff
 namespace {
@@ -884,7 +886,7 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         // Remove conflicting transactions from the mempool
         for (const CTxMemPool::txiter it : allConflicting)
         {
-            LogPrint(BCLog::MEMPOOL, "replacing tx %s with %s for %s RVN additional fees, %d delta bytes\n",
+            LogPrint(BCLog::MEMPOOL, "replacing tx %s with %s for %s TNA additional fees, %d delta bytes\n",
                     it->GetTx().GetHash().ToString(),
                     hash.ToString(),
                     FormatMoney(nModifiedFees - nConflictingFees),
@@ -1179,18 +1181,19 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
     return true;
 }
 
-CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
-{
-    int halvings = nHeight / consensusParams.nSubsidyHalvingInterval;
-    // Force block reward to zero when right shift is undefined.
-    if (halvings >= 64)
-        return 0;
-
-    CAmount nSubsidy = 5000 * COIN;
-    // Subsidy is cut in half every 2,100,000 blocks which will occur approximately every 4 years.
-    nSubsidy >>= halvings;
-    return nSubsidy;
+CAmount GetBlockSubsidy(int nHeight, const Consensus::Params &consensusParams) {
+        CAmount nSubsidy;
+	if (nHeight <= 5000 ) {
+		nSubsidy = nHeight*COIN;
+        } else if (nHeight >= 5001 && nHeight <= 1057200 ) {
+                float nbc = 5000-((nHeight - 5001)*0.0045814);
+                nSubsidy = nbc*COIN;
+        } else if (nHeight >= 1057201 ) {
+                nSubsidy = 250*COIN;
+        }
+        return nSubsidy;
 }
+
 
 bool IsInitialBlockDownload()
 {
@@ -2003,7 +2006,7 @@ static bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, 
 static CCheckQueue<CScriptCheck> scriptcheckqueue(128);
 
 void ThreadScriptCheck() {
-    RenameThread("raven-scriptch");
+    RenameThread("taona-scriptch");
     scriptcheckqueue.Thread();
 }
 
@@ -2013,7 +2016,7 @@ VersionBitsCache versionbitscache;
 int32_t ComputeBlockVersion(const CBlockIndex* pindexPrev, const Consensus::Params& params)
 {
     LOCK(cs_main);
-    int32_t nVersion = VERSIONBITS_TOP_BITS;
+    int32_t nVersion = VERSIONBITS_TOP_BITS_ASSETS;
 
     /** If the assets are deployed now. We need to use the correct block version */
     if (AreAssetsDeployed())
@@ -2519,11 +2522,42 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     LogPrint(BCLog::BENCH, "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs (%.2fms/blk)]\n", (unsigned)block.vtx.size(), MILLI * (nTime3 - nTime2), MILLI * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : MILLI * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * MICRO, nTimeConnect * MILLI / nBlocksTotal);
 
     CAmount blockReward = nFees + GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus());
-    if (block.vtx[0]->GetValueOut() > blockReward)
-        return state.DoS(100,
-                         error("ConnectBlock(): coinbase pays too much (actual=%d vs limit=%d)",
+    const int nBlockHeight = chainActive.Height() + 1;
+    // Dev Fund address:
+    if (nBlockHeight <= DEV_FUND_UNTIL) {
+      // Sum all of block.vtx[0] and make sure it's not greater than the allowed amount for the block.
+      if (block.vtx[0]->GetValueOut() > blockReward + GetDevCoin(blockReward))
+          return state.DoS(100, error("ConnectBlock(): coinbase pays too much (actual=%d vs limit=%d)",
+                                 block.vtx[0]->GetValueOut(), blockReward),
+                                 REJECT_INVALID, "bad-cb-amount");
+
+      CTaonaAddress address(DEV_ADDRESS);
+      CScript scriptPubKey = GetScriptForDestination(CTaonaAddress(address).Get());
+
+      int dev_transaction_present = 0;
+
+      // We iterate through the vouts of vtx[0] looking for the dev fee. This
+      // allows flexibility on the miners to put the dev fee anywhere inside of
+      // the first transaction. As long as it's present in any vout of that
+      // first tx and the right amount, we're good to go.
+
+      const CTransaction &tx = *(block.vtx[0]);
+      for(auto m : tx.vout) {
+        if (m.scriptPubKey == scriptPubKey && m.nValue == GetDevCoin(blockReward)) {
+          dev_transaction_present++;
+        }
+      }
+
+      if (dev_transaction_present < 1)
+        return state.DoS(100, error("ConnectBlock(): coinbase does not pay to the dev fund address."), REJECT_INVALID, "bad-cb-dev-fee");
+
+    // End Dev Fund address:
+    } else {
+      if (block.vtx[0]->GetValueOut() > blockReward)
+        return state.DoS(100, error("ConnectBlock(): coinbase pays too much (actual=%d vs limit=%d)",
                                block.vtx[0]->GetValueOut(), blockReward),
                                REJECT_INVALID, "bad-cb-amount");
+    }
 
     if (!control.Wait())
         return state.DoS(100, error("%s: CheckQueue failed", __func__), REJECT_INVALID, "block-validation-failed");
@@ -3059,7 +3093,7 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
         bool flushed = view.Flush();
         assert(flushed);
         nTime4 = GetTimeMicros(); nTimeFlush += nTime4 - nTime3;
-        LogPrint(BCLog::BENCH, "  - Flush RVN: %.2fms [%.2fs (%.2fms/blk)]\n", (nTime4 - nTime3) * MILLI, nTimeFlush * MICRO, nTimeFlush * MILLI / nBlocksTotal);
+        LogPrint(BCLog::BENCH, "  - Flush TNA: %.2fms [%.2fs (%.2fms/blk)]\n", (nTime4 - nTime3) * MILLI, nTimeFlush * MICRO, nTimeFlush * MILLI / nBlocksTotal);
 
         /** RVN START */
         nTimeAssetsFlush = GetTimeMicros();
@@ -5370,14 +5404,13 @@ double GuessVerificationProgress(const ChainTxData& data, CBlockIndex *pindex) {
 /** RVN START */
 bool AreAssetsDeployed() {
 
-    if (fAssetsIsActive)
-        return true;
-
-    const ThresholdState thresholdState = VersionBitsTipState(Params().GetConsensus(), Consensus::DEPLOYMENT_ASSETS);
-    if (thresholdState == THRESHOLD_ACTIVE)
-        fAssetsIsActive = true;
-
-    return fAssetsIsActive;
+  const int nBlockHeight = chainActive.Height() + 1;
+  if (nBlockHeight >= ASSET_ACTIVATION_HEIGHT) {
+    fAssetsIsActive = true;
+  } else {
+    fAssetsIsActive = false;
+  }
+  return fAssetsIsActive;
 }
 
 bool IsDGWActive(unsigned int nBlockNumber) {
@@ -5402,3 +5435,8 @@ public:
         mapBlockIndex.clear();
     }
 } instance_of_cmaincleanup;
+
+CAmount GetDevCoin(CAmount reward) {
+  return 0.01 * reward;
+}
+

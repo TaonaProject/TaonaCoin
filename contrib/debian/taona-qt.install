@@ -1,0 +1,6 @@
+usr/local/bin/taona-qt usr/bin
+share/pixmaps/taona32.xpm usr/share/pixmaps
+share/pixmaps/taona16.xpm usr/share/pixmaps
+share/pixmaps/taona128.png usr/share/pixmaps
+debian/taona-qt.desktop usr/share/applications
+debian/taona-qt.protocol usr/share/kde4/services/

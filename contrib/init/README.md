@@ -1,11 +1,11 @@
 Sample configuration files for:
 ```
-SystemD: ravend.service
-Upstart: ravend.conf
-OpenRC:  ravend.openrc
-         ravend.openrcconf
-CentOS:  ravend.init
-OS X:    org.raven.ravend.plist
+SystemD: taonad.service
+Upstart: taonad.conf
+OpenRC:  taonad.openrc
+         taonad.openrcconf
+CentOS:  taonad.init
+OS X:    org.taona.taonad.plist
 ```
 have been made available to assist packagers in creating node packages here.
 

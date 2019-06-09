@@ -1,11 +1,11 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_SCRIPT_SCRIPT_H
-#define RAVEN_SCRIPT_SCRIPT_H
+#ifndef TAONA_SCRIPT_SCRIPT_H
+#define TAONA_SCRIPT_SCRIPT_H
 
 #include "crypto/common.h"
 #include "prevector.h"
@@ -185,7 +185,7 @@ enum opcodetype
     OP_NOP10 = 0xb9,
 
     /** RVN START */
-    OP_RVN_ASSET = 0xc0,
+    OP_TNA_ASSET = 0xc0,
     /** RVN END */
 
 
@@ -633,7 +633,7 @@ public:
     }
 
     /**
-     * Pre-version-0.6, Raven always counted CHECKMULTISIGs
+     * Pre-version-0.6, Taona always counted CHECKMULTISIGs
      * as 20 sigops. With pay-to-script-hash, that changed:
      * CHECKMULTISIGs serialized in scriptSigs are
      * counted more accurately, assuming they are of the form
@@ -726,4 +726,4 @@ bool ScriptNewAsset(const CScript& scriptPubKey, int& nStartingIndex);
 bool ScriptTransferAsset(const CScript& scriptPubKey, int& nStartingIndex);
 bool ScriptReissueAsset(const CScript& scriptPubKey, int& nStartingIndex);
 
-#endif // RAVEN_SCRIPT_SCRIPT_H
+#endif // TAONA_SCRIPT_SCRIPT_H

@@ -1,0 +1,92 @@
+#!/sbin/runscript
+
+# backward compatibility for existing gentoo layout 
+#
+if [ -d "/var/lib/taona/.taona" ]; then
+	TAONAD_DEFAULT_DATADIR="/var/lib/taona/.taona"
+else
+	TAONAD_DEFAULT_DATADIR="/var/lib/taonad"
+fi
+
+TAONAD_CONFIGFILE=${TAONAD_CONFIGFILE:-/etc/taona/taona.conf}
+TAONAD_PIDDIR=${TAONAD_PIDDIR:-/var/run/taonad}
+TAONAD_PIDFILE=${TAONAD_PIDFILE:-${TAONAD_PIDDIR}/taonad.pid}
+TAONAD_DATADIR=${TAONAD_DATADIR:-${TAONAD_DEFAULT_DATADIR}}
+TAONAD_USER=${TAONAD_USER:-${TAONA_USER:-taona}}
+TAONAD_GROUP=${TAONAD_GROUP:-taona}
+TAONAD_BIN=${TAONAD_BIN:-/usr/bin/taonad}
+TAONAD_NICE=${TAONAD_NICE:-${NICELEVEL:-0}}
+TAONAD_OPTS="${TAONAD_OPTS:-${TAONA_OPTS}}"
+
+name="Taona Core Daemon"
+description="Taona cryptocurrency P2P network daemon"
+
+command="/usr/bin/taonad"
+command_args="-pid=\"${TAONAD_PIDFILE}\" \
+		-conf=\"${TAONAD_CONFIGFILE}\" \
+		-datadir=\"${TAONAD_DATADIR}\" \
+		-daemon \
+		${TAONAD_OPTS}"
+
+required_files="${TAONAD_CONFIGFILE}"
+start_stop_daemon_args="-u ${TAONAD_USER} \
+			-N ${TAONAD_NICE} -w 2000"
+pidfile="${TAONAD_PIDFILE}"
+
+# The retry schedule to use when stopping the daemon. Could be either
+# a timeout in seconds or multiple signal/timeout pairs (like
+# "SIGKILL/180 SIGTERM/300")
+retry="${TAONAD_SIGTERM_TIMEOUT}"
+
+depend() {
+	need localmount net
+}
+
+# verify
+# 1) that the datadir exists and is writable (or create it)
+# 2) that a directory for the pid exists and is writable
+# 3) ownership and permissions on the config file
+start_pre() {
+	checkpath \
+	-d \
+	--mode 0750 \
+	--owner "${TAONAD_USER}:${TAONAD_GROUP}" \
+	"${TAONAD_DATADIR}"
+
+	checkpath \
+	-d \
+	--mode 0755 \
+	--owner "${TAONAD_USER}:${TAONAD_GROUP}" \
+	"${TAONAD_PIDDIR}"
+
+	checkpath -f \
+	-o ${TAONAD_USER}:${TAONAD_GROUP} \
+	-m 0660 \
+	${TAONAD_CONFIGFILE}
+
+	checkconfig || return 1
+}
+
+checkconfig()
+{
+	if ! grep -qs '^rpcpassword=' "${TAONAD_CONFIGFILE}" ; then
+		eerror ""
+		eerror "ERROR: You must set a secure rpcpassword to run taonad."
+		eerror "The setting must appear in ${TAONAD_CONFIGFILE}"
+		eerror ""
+		eerror "This password is security critical to securing wallets "
+		eerror "and must not be the same as the rpcuser setting."
+		eerror "You can generate a suitable random password using the following "
+		eerror "command from the shell:"
+		eerror ""
+		eerror "bash -c 'tr -dc a-zA-Z0-9 < /dev/urandom | head -c32 && echo'"
+		eerror ""
+		eerror "It is recommended that you also set alertnotify so you are "
+		eerror "notified of problems:"
+		eerror ""
+		eerror "ie: alertnotify=echo %%s | mail -s \"Taona Alert\"" \
+			"admin@foo.com"
+		eerror ""
+		return 1
+	fi
+}

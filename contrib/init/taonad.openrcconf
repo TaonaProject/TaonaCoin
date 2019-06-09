@@ -1,0 +1,33 @@
+# /etc/conf.d/taonad: config file for /etc/init.d/taonad
+
+# Config file location
+#TAONAD_CONFIGFILE="/etc/taona/taona.conf"
+
+# What directory to write pidfile to?  (created and owned by $TAONAD_USER)
+#TAONAD_PIDDIR="/var/run/taonad"
+
+# What filename to give the pidfile
+#TAONAD_PIDFILE="${TAONAD_PIDDIR}/taonad.pid"
+
+# Where to write taonad data (be mindful that the blockchain is large)
+#TAONAD_DATADIR="/var/lib/taonad"
+
+# User and group to own taonad process
+#TAONAD_USER="taona"
+#TAONAD_GROUP="taona"
+
+# Path to taonad executable
+#TAONAD_BIN="/usr/bin/taonad"
+
+# Nice value to run taonad under
+#TAONAD_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+#TAONAD_OPTS=""
+
+# The timeout in seconds OpenRC will wait for taonad to terminate
+# after a SIGTERM has been raised.
+# Note that this will be mapped as argument to start-stop-daemon's
+# '--retry' option, which means you can specify a retry schedule
+# here. For more information see man 8 start-stop-daemon.
+TAONAD_SIGTERM_TIMEOUT=60

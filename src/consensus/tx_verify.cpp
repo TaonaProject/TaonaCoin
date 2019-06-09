@@ -1,5 +1,5 @@
 // Copyright (c) 2017-2017 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -192,7 +192,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
         if (txout.scriptPubKey.IsAssetScript(nType, fIsOwner))
             isAsset = true;
 
-        // Make sure that all asset tx have a nValue of zero RVN
+        // Make sure that all asset tx have a nValue of zero TNA
         if (isAsset && txout.nValue != 0)
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-asset-tx-amount-isn't-zero");
 
@@ -314,7 +314,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                 }
             } else {
                 // Fail if transaction contains any non-transfer asset scripts and hasn't conformed to one of the
-                // above transaction types.  Also fail if it contains OP_RVN_ASSET opcode but wasn't a valid script.
+                // above transaction types.  Also fail if it contains OP_TNA_ASSET opcode but wasn't a valid script.
                 for (auto out : tx.vout) {
                     int nType;
                     bool _isOwner;
@@ -323,7 +323,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                             return state.DoS(100, false, REJECT_INVALID, "bad-txns-bad-asset-transaction");
                         }
                     } else {
-                        if (out.scriptPubKey.Find(OP_RVN_ASSET) > 0) {
+                        if (out.scriptPubKey.Find(OP_TNA_ASSET) > 0) {
                             return state.DoS(100, false, REJECT_INVALID, "bad-txns-bad-asset-script");
                         }
                     }

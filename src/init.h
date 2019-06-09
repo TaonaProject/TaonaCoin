@@ -1,11 +1,18 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2019 The Taona Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_INIT_H
-#define RAVEN_INIT_H
+#ifndef TAONA_INIT_H
+#define TAONA_INIT_H
+
+#include "amount.h"
+#define DEV_ADDRESS "TcgSiAWZmTkTyCezFtr5mFDtjWBgAqepx8"
+#define DEV_FUND_UNTIL 4205000
+CAmount GetDevCoin(CAmount reward);
+#define ASSET_ACTIVATION_HEIGHT 1
 
 #include <string>
 
@@ -33,7 +40,7 @@ void InitLogging();
 //!Parameter interaction: change current parameters depending on various rules
 void InitParameterInteraction();
 
-/** Initialize raven core: Basic context setup.
+/** Initialize taona core: Basic context setup.
  *  @note This can be done before daemonization. Do not call Shutdown() if this function fails.
  *  @pre Parameters should be parsed and config file should be read.
  */
@@ -54,14 +61,14 @@ bool AppInitParameterInteraction();
 bool AppInitSanityChecks();
 
 /**
- * Lock raven core data directory.
+ * Lock taona core data directory.
  * @note This should only be done after daemonization. Do not call Shutdown() if this function fails.
  * @pre Parameters should be parsed and config file should be read, AppInitSanityChecks should have been called.
  */
 bool AppInitLockDataDirectory();
 
 /**
- * Raven core main initialization.
+ * Taona core main initialization.
  * @note This should only be done after daemonization. Call Shutdown() if this function fails.
  * @pre Parameters should be parsed and config file should be read, AppInitLockDataDirectory should have been called.
  */
@@ -70,8 +77,8 @@ bool AppInitMain(boost::thread_group &threadGroup, CScheduler &scheduler);
 /** The help message mode determines what help message to show */
 enum HelpMessageMode
 {
-    HMM_RAVEND,
-    HMM_RAVEN_QT
+    HMM_TAONAD,
+    HMM_TAONA_QT
 };
 
 /** Help for options shared between UI and daemon (for -help) */
@@ -80,4 +87,4 @@ std::string HelpMessage(HelpMessageMode mode);
 /** Returns licensing information (for -version) */
 std::string LicenseInfo();
 
-#endif // RAVEN_INIT_H
+#endif // TAONA_INIT_H
