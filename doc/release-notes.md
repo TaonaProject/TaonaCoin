@@ -12,10 +12,6 @@ Please report bugs using the issue tracker at GitHub:
 
   <https://github.com/TaonaProject/Taonacoin/issues>
 
-To receive security and update notifications, please subscribe to:
-
-  <https://taonacoin.org/en/list/announcements/join/>
-
 How to Upgrade
 ==============
 
