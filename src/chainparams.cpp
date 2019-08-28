@@ -200,6 +200,7 @@ public:
         vSeeds.emplace_back("seed1.taonacoin.com", false);
         vSeeds.emplace_back("seed2.taonacoin.com", false);
         vSeeds.emplace_back("seed3.taonacoin.com", false);
+        vSeeds.emplace_back("community1.taonacoin.com", false);
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,66);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,125);
