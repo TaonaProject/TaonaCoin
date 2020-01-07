@@ -200,6 +200,9 @@ public:
         vSeeds.emplace_back("seed1.taonacoin.com", false);
         vSeeds.emplace_back("seed2.taonacoin.com", false);
         vSeeds.emplace_back("seed3.taonacoin.com", false);
+        vSeeds.emplace_back("seed4.taonacoin.com", false);
+        vSeeds.emplace_back("seed5.taonacoin.com", false);
+        vSeeds.emplace_back("seed6.taonacoin.com", false);
         vSeeds.emplace_back("community1.taonacoin.com", false);
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,66);
@@ -217,11 +220,12 @@ public:
 
         checkpointData = (CCheckpointData) {
             {
-                { 2000, uint256S("0x000000000033b90311b2d6ff8a6f9fca52ed100fb6643425a02263f356665472")},
-                { 20000, uint256S("0x0000000001671ee928587a0da700d3a930a7c280d4b68f7a197a9028fcde579c")},
                 { 50000, uint256S("0x0000000000ea511e464ce9bbf3cae4854d3bf82493517606ec3fbf0863111a9c")},
-                { 75000, uint256S("0x0000000003a6a7bc116c072d0a91b0d54067758205f3f90ed309255c9b38543b")},
                 { 100000, uint256S("0x000000000292860d435c34a4132253ba94911d1d7e6f1999657a0e89255d072a")},
+                { 150000, uint256S("0000000006aded85cf996ca1fe44fbfaa22b450acb4aee0009d43edb5c33b73f")},
+                { 200000, uint256S("000000000b17eaad441cdbd530550ece9afd5ec7eb529508411ca92a04926221")},
+                { 300000, uint256S("000000000036f0b25189183e3d3c84532ec971d7f056803ce5e069cdbb4e6213")},
+
             }
         };
 
