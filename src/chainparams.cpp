@@ -198,12 +198,9 @@ public:
         assert(genesis.hashMerkleRoot == uint256S("432d892f8d8efb4a6750781f248c42911d8ea1c8b77ee460afb43bc8b717b978"));
 
         vSeeds.emplace_back("seed1.taonacoin.com", false);
-        vSeeds.emplace_back("seed2.taonacoin.com", false);
-        vSeeds.emplace_back("seed3.taonacoin.com", false);
-        vSeeds.emplace_back("seed4.taonacoin.com", false);
-        vSeeds.emplace_back("seed5.taonacoin.com", false);
-        vSeeds.emplace_back("seed6.taonacoin.com", false);
         vSeeds.emplace_back("community1.taonacoin.com", false);
+	vSeeds.emplace_back("community2.taonacoin.com", false);
+	vSeeds.emplace_back("community3.taonacoin.com", false);
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,66);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,125);
@@ -225,6 +222,7 @@ public:
                 { 150000, uint256S("0000000006aded85cf996ca1fe44fbfaa22b450acb4aee0009d43edb5c33b73f")},
                 { 200000, uint256S("000000000b17eaad441cdbd530550ece9afd5ec7eb529508411ca92a04926221")},
                 { 300000, uint256S("000000000036f0b25189183e3d3c84532ec971d7f056803ce5e069cdbb4e6213")},
+                { 440000 uint256S("d02392c8b4af09008d4a2d3ac64865d264d4aa4b66776873d4d22bc8d908f299")},
 
             }
         };
